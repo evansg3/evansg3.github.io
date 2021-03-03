@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Hello, WebVR! • A-Frame • MineCraft House</title>
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+  </head>
+  <body>
+    <a-scene background="color: #FAFAFA">
+      <a-box position="0 0 -5" color="firebrick" shadow></a-box>
+	  <a-box position="2 0 -5" color="burlywood" shadow></a-box>
+      <a-box position="4 0 -5" color="darkgray" shadow></a-box>
+	  <a-box position="6 0 -5" color="tomato" shadow></a-box>
+	  <a-box position="8 0 -5" color="antiquewhite" shadow></a-box>
+      <a-box position="10 0 -5" color="silver" shadow></a-box>
+      <a-plane position="0 -0.5 -20" rotation="-90 0 0" width="40" height="40" color="seagreen" shadow></a-plane>
+	  <a-entity camera look-controls wasd-controls="acceleration:1000" position="0 10 10"></a-entity>
+    </a-scene>
+  </body>
+  
+  <script>
+	let blocks = [
+		{type:"wall",posFrom:[  0,   0, -10], posTo:[  5,  0, -10],height:8},//wa-f-l
+		{type:"wall",posFrom:[ 11,   0, -10], posTo:[ 16,  0, -10],height:8},//wa-f-r
+		{type:"wall",posFrom:[  6,   5, -10], posTo:[ 10,  5, -10],height:3},//wa-f-d-lint
+		{type:"wall",posFrom:[  0,   0, -20], posTo:[  6,  0, -20],height:8},//wa-b-l
+		{type:"wall",posFrom:[  9,   0, -20], posTo:[ 16,  0, -20],height:8},//wa-b-r
+		{type:"wall",posFrom:[  7,   0, -20], posTo:[ 10,  0, -20],height:1},//wa-b-w-base
+		{type:"wall",posFrom:[  7,   5, -20], posTo:[ 10,  5, -20],height:3},//wa-b-w-lint
+		{type:"door",posFrom:[  6,   0, -10], posTo:[ 10,  0, -10],height:5},//do-f
+	  {type:"window",posFrom:[  7,   1, -20], posTo:[  9,  1, -20],height:5},//wi-b
+		{type:"wall",posFrom:[  0,   0, -19], posTo:[  0,  0, -11],height:8},//wa-l
+		{type:"wall",posFrom:[ 16,   0, -19], posTo:[ 16,  0, -11],height:8}, //wa-r
+		{type:"roof",posFrom:[ -1,   7, -15], posTo:[ 17,  7,  -8],height:-4,slope:"Z"},//ro-f
+		{type:"roof",posFrom:[ -1,   7, -22], posTo:[ 17,  7, -16],height:3,slope:"Z"}//ro-f
+	];
+	
+	function buildHouse(){
+		let scene = document.querySelector('a-scene');
+		for(let i=0;i<blocks.length;i++){
+			let blockItem = blocks[i];
+			switch(blockItem.type){
+				case "wall":
+					buildWall(scene,blockItem,getColor(blockItem.type)); break;
+				case "window":
+					buildWindow(scene,blockItem,getColor(blockItem.type)); break;
+				case "door":
+					buildDoor(scene,blockItem,getColor(blockItem.type)); break;
+				case "roof":
+					buildRoof(scene,blockItem,getColor(blockItem.type)); break;
+			}
+		}	
+	}
+	
+	function buildWall(scene,blockItem,color){//forward only, i.e. increasing numbers
+		for(let x=blockItem.posFrom[0];x<=blockItem.posTo[0];x++){
+			for(let y=blockItem.posFrom[1];y<=blockItem.posTo[1];y++){
+				for(let z=blockItem.posFrom[2];z<=blockItem.posTo[2];z++){
+					for(let h=0;h<blockItem.height;h++){
+						scene.appendChild(blockFactory({"x":x,"y":y+h,"z":z},getColor(blockItem.type)[Math.abs(x+y+z+h)%2]));
+					}					
+				}
+			}
+		}		
+	}
+	
+	function buildWindow(scene,blockItem,color){//only boundaries
+		for(let x=blockItem.posFrom[0];x<=blockItem.posTo[0];x++){
+			for(let y=blockItem.posFrom[1];y<=blockItem.posTo[1];y++){
+				for(let z=blockItem.posFrom[2];z<=blockItem.posTo[2];z++){			
+					for(let h=0;h<blockItem.height;h++){
+						if(x>blockItem.posFrom[0]&&x<blockItem.posTo[0]){//skip all but first and last
+							if((h!=0)&&h!=(blockItem.height-1)) continue;
+						}
+						if(z>blockItem.posFrom[2]&&z<blockItem.posTo[2]){//skip all but first and last
+							if((h!=0)&&h!=(blockItem.height-1)) continue;
+						}
+						scene.appendChild(blockFactory({"x":x,"y":y+h,"z":z},getColor(blockItem.type)[Math.abs(x+y+z+h)%2]));
+					}					
+				}
+			}
+		}
+	}
+	
+	function buildDoor(scene,blockItem,color){//only boundaries
+		for(let x=blockItem.posFrom[0];x<=blockItem.posTo[0];x++){
+			for(let y=blockItem.posFrom[1];y<=blockItem.posTo[1];y++){
+				for(let z=blockItem.posFrom[2];z<=blockItem.posTo[2];z++){			
+					for(let h=0;h<blockItem.height;h++){
+						if(x>blockItem.posFrom[0]&&x<blockItem.posTo[0]){//skip all but first and last
+							if(h!=(blockItem.height-1)) continue;
+						}
+						if(z>blockItem.posFrom[2]&&z<blockItem.posTo[2]){//skip all but first and last
+							if(h!=(blockItem.height-1)) continue;
+						}
+						scene.appendChild(blockFactory({"x":x,"y":y+h,"z":z},getColor(blockItem.type)[Math.abs(x+y+z+h)%2]));
+					}					
+				}
+			}
+		}
+	}
+	
+	function buildRoof(scene,blockItem,color){//sloping plane
+	/*coarse slope => Y = M*X+C
+	//where 		  M = (Y2-Y1)/(X2-X1) //two known points on line 
+	//now 		  Y2-Y1 = blockItem.height 
+	//also			  M = blockItem.height/(X2-X1)// where X2,X1 are determined by blockItem.slope
+	//finally         C=  y-intercept when x=0
+	//hence           C = Y2-M*X2*/
+		let mult = {c:0,m:0,xDim:0,zDim:0,x2:0,x1:0,y2:0,yDelta:blockItem.height,skip:false	};
+		if(blockItem.slope=="Z"){//slope could be z
+				mult.zDim = 1; //slope changes with changing z
+				mult.x2 = blockItem.posTo[2];
+				mult.x1 = blockItem.posFrom[2];
+				if(blockItem.posFrom[2]==blockItem.posTo[2]){
+					mult.skip=true;//flat, no incline
+				}
+		}
+		else{//slope is x
+				mult.xDim = 1;				
+				mult.x2 = blockItem.posTo[0];
+				mult.x1 = blockItem.posFrom[0];
+				if(blockItem.posFrom[0]==blockItem.posTo[0]){
+					mult.skip=true;
+				}
+		}
+		mult.y2 = blockItem.posFrom[1]+(mult.yDelta>0?mult.yDelta:0);
+		if(!mult.skip) mult.m = mult.yDelta/(mult.x2-mult.x1);
+		mult.c = mult.y2 - mult.x2*mult.m;
+		for(let x=blockItem.posFrom[0];x<=blockItem.posTo[0];x++){
+			for(let y=blockItem.posFrom[1];y<=blockItem.posTo[1];y++){
+				for(let z=blockItem.posFrom[2];z<=blockItem.posTo[2];z++){//coarse line-slope formula
+					//Y =mX+c (X is z or x ... 
+					let yi = mult.m*(x*mult.xDim+z*mult.zDim)+mult.c;
+					scene.appendChild(blockFactory({"x":x,"y":yi,"z":z},getColor(blockItem.type)[Math.abs(x+y+z)%2]));
+				}
+			}
+		}
+	}
+	
+	function getColor(type){
+		switch(type){
+			case "wall": return ["white","lightblue"]; break;
+			case "window": return ["antiquewhite","antiquewhite"]; break;
+			case "roof": return ["darkorange","lightorange"]; break;
+			case "door": return ["white","white"]; break;
+			default:
+				console.log("undef",type);
+				return ["red","green"];
+		}
+	}
+	
+	function blockFactory(pos,color){//key function to add scene elements programmatically
+		let block = document.createElement('a-box');
+		block.object3D.position.set(pos.x, pos.y, pos.z);
+		block.setAttribute('color',color);
+		return block;
+	}
+	
+	document.querySelector("a-scene").addEventListener("loaded",function(){//once a-scene is loaded, trigger the function to draw the house
+		console.log("Use me to debug if needed");
+		buildHouse();
+	});
+	
+	
+  </script>
+</html>

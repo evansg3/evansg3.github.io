@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Hello, WebVR! • A-Frame • BubbleTree</title>
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+  </head>
+  <body>
+    <a-scene id="scene" background="color: #FAFAFA">
+      <a-entity id="tree" position="0 0 -30">
+		<a-cylinder radius="2"  color="blue"      height ="10"  position="0  5 0"></a-cylinder>
+		<a-sphere radius="10" color="lightgreen" opacity="0.4" position="0 20 0"></a-sphere>
+
+	  </a-entity>
+      <a-plane position="0 0 -20" rotation="-90 0 0" width="40" height="40" color="peru"></a-plane>
+	  <a-entity camera look-controls wasd-controls="acceleration:1000" position="0 15 -10"></a-entity>
+    </a-scene>
+  </body>
+  
+  <script>	
+	function buildFoliage(){
+		console.log("This function can be populated with your code to create the foliage");
+		
+		for (let i = 0; i < 10; i++) {
+			let pos = {x:0, y:20, z:-30};
+			let bush = bubbleFactory(pos, "red", {x:0, y:0, z:0});
+			document.getElementById("scene").append(bush);
+		}
+	}
+
+
+	function bubbleFactory(pos,color,rotation){//key function to add scene elements programmatically
+		let wrapper = document.createElement('a-entity');
+		//rotation can be specified in degrees, this function will convert to rad for you
+		
+		wrapper.object3D.rotation.set(rotation.x*Math.PI/180.0, rotation.y*Math.PI/180.0, rotation.z*Math.PI/180.0);
+		
+		let bubble = document.createElement('a-sphere');
+		bubble.object3D.position.set(pos.x, pos.y, pos.z);
+		bubble.setAttribute('color',color);
+		bubble.setAttribute('shadow', '');
+		wrapper.appendChild(bubble);
+		
+		return wrapper;
+	}
+	
+	document.querySelector("a-scene").addEventListener("loaded",function(){//once a-scene is loaded, trigger the function to draw the house
+		console.log("Use me to debug if needed");
+		buildFoliage();
+	});
+	
+	
+  </script>
+</html>
