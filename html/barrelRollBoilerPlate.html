@@ -1,0 +1,60 @@
+<html>
+ <head>
+	<meta charset="UTF-8">
+   <script src="https://aframe.io/releases/1.0.0/aframe.min.js"></script>
+ </head>
+ <body> 
+	<a-scene id="ascene"  debug>
+		<a-assets>											
+			<a-mixin id="spin" 
+				animation__xr="property:rotation.x;from:0;to:-360;dur:3000;dir:normal;loop:1;easing:linear;startEvents:br;"
+			</a-mixin>
+			<a-mixin id="fly" 
+				animation__p="property:position.x;from:0;to:10;dur:3000;dir:normal;loop:1;easing:linear;startEvents:br;"
+			</a-mixin>
+			<a-mixin id="turn"
+				animation__zr="property:rotation.z;from:0;to:-90;dur:3000;dir:normal;loop:1;easing:linear;startEvent;br;"
+			</a-mixin>
+		</a-assets>
+		
+		<a-entity id="world" position="-5 -2.5 -5"><!--Offset entire world while keeping camera fixed-->
+			<a-entity mixin="spin  fly  turn" rotation="0 0 0">
+				<a-entity id="airplane"  rotation="0 0 0" position="0 -5 0">
+					<a-cone rotation="0 0 -90" color="#000000" radius-bottom="1" height="4" position="1 0 0">
+						<a-sphere scale="0.2 1 4" color="#FFFF00" position="0 -0.7  0"></a-sphere> 
+						<a-sphere scale="0.3 0.5 0.3" color="blue" position="-0.3 0.6  0"></a-sphere> 
+					</a-cone>
+				</a-entity>
+			</a-entity>
+			<a-entity id="axes">
+				<a-entity id="xaxis" line="start: 0, 0, 0; end: 10 0 0; color: red;   opacity:1; transparent:true;" >
+					<a-cone height="2" radius-bottom="0.5" rotation="0 0 -90" position="10 0 0" color="tomato"></a-cone>
+					<a-entity id="lblX" position="8 1.5 0"     side:double          
+					text="color: tomato; align: left; value:X-axis; wrapCount:6; width: 6; height: auto;opacity:1; transparent:true;">
+					</a-entity>
+				</a-entity>
+				<a-entity id="zaxis" line="start: 0, 0, 0; end:   0 0 10; color: blue;  opacity:1; transparent:true;" >
+					<a-cone height="2" radius-bottom="0.5" rotation="90 0 0" position="0 0 10" color="cornflowerblue"></a-cone>
+					<a-entity id="lblZ" position="0 1.5 8" rotation="0 90 0" side:"back"              
+					text="color: cornflowerblue; align: left; value:Z-axis; wrapCount:6; width: 6; height: auto;">
+					</a-entity>
+				</a-entity>	
+				<a-entity id="yaxis" line="start: 0, 0, 0; end:   0 10  0; color: green; opacity:1; transparent:true;" >
+					<a-cone height="2" radius-bottom="0.5" rotation="0 0 0" position="0 10 0" color="seagreen"></a-cone>
+					<a-entity id="lblX" position="1.5 8 0" rotation="0 0 90" side:"double"              
+					text="color: seagreen; align: left; value:Y-axis; wrapCount:6; width: 6; height: auto;opacity:1; transparent:true;">
+					</a-entity>
+				</a-entity>	
+			</a-entity>	
+		</a-entity>
+		
+		<a-entity id="camera" camera="active: true" look-controls wasd-controls="acceleration:1000" position="0 3 20"></a-entity>
+		<a-sky color="azure"></a-sky>	
+   </a-scene>
+   <script>
+		let aero=document.getElementById("airplane");
+		document.addEventListener('click',function(){aero.emit("br");});
+   </script>
+   
+ </body>
+</html>
