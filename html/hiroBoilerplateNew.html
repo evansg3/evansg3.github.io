@@ -1,0 +1,95 @@
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<script src="https://aframe.io/releases/1.0.0/aframe.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.0/dist/aframe-extras.loaders.min.js"></script>
+		<script src="https://unpkg.com/aframe-aabb-collider-component@3.1.0/dist/aframe-aabb-collider-component.min.js"></script>
+		<script src="https://jeromeetienne.github.io/AR.js/aframe/build/aframe-ar.js"></script>
+	</head>
+	<body>
+		<a-scene id="ascene"  debug arjs>
+			<a-assets>
+				<a-mixin id="rotY" animation__ry="property:object3D.rotation.y;from:60;to:120;dir:alternate;dur:1200;loop:true;easing:linear;"></a-mixin>
+				<a-mixin id="rotX" animation__rx="property:object3D.rotation.x;from:-10;to:+10;dir:alternate;dur:1200;loop:true;easing:linear;"></a-mixin>
+				<a-mixin id="revY" position="0 0 -5" animation__rey="property:object3D.rotation.y;from:0;to:360;dir:normal;dur:4800;loop:true;easing:linear;"></a-mixin>
+				<a-mixin id="specs" rotation="0 0 0" animation-mixer="clip:Take*"></a-mixin>
+			</a-assets>
+		
+			<a-text value="HIRO'S RULES: GREEN: +2 | BLUE: -2 | REMOVE ALL TO WIN!" style="color:#0000ff" position="-2 -1 0"></a-text>
+
+			<a-marker preset='hiro'>
+				<!-- here define the content to display on top of the marker -->
+				<a-gltf-model id="lw" src="../assets/little_wizard/lilwizard.gltf" 
+					scale="0.05 0.05 0.05" aabb-collider="objects: .target"				
+					rotation="-90 0 0">
+				</a-gltf-model>
+			</a-marker>
+		
+			<a-entity id="pair01" mixin="revY" class="pairs">
+				<a-entity class="target green" position="2 0 0">
+					<a-gltf-model src="../assets/flamegreen/flamegreen.gltf" mixin="specs rotY rotX"></a-gltf-model>
+				</a-entity>
+				
+				<a-entity class="target blue" position="-2 0 0">
+					<a-gltf-model src="../assets/flameblue/flameblue.gltf" mixin="specs rotY rotX"></a-gltf-model>
+				</a-entity>
+			</a-entity>
+			<a-sky color="#d0d0d0"></a-sky>
+			<a-entity id="camera" camera="active: true" look-controls wasd-controls="acceleration:300" position="1 2 11">
+		</a-scene>
+	</body>
+	
+	<script>
+		let idx=2;
+		let scene = document.querySelector('a-scene');
+		let track=false;
+		
+		document.addEventListener('hitstart',function(evt){
+			if(track)processEvent(evt);      
+		});
+		document.addEventListener('markerFound',function(evt){
+			track=true;
+		});
+		document.addEventListener('markerLost',function(evt){
+			track=false;
+		});
+		
+		function processEvent(evt){//two events are generated...one each for the two entities that collided
+			console.log(evt.type, evt.srcElement.id, evt.target.id, evt.target.className);      
+			//filter response using the target.className
+			if(evt.target.className.includes("target")){
+				let targetType = evt.target.className.includes("blue")?"blue":"green";
+				if(targetType == "green") {
+					flameFactory(idx,scene)
+				} else if (targetType == "blue") {
+					extinguishFlame()
+				} if (green < 5) {
+					alert("You failed.");
+				}
+				console.log("TBD: here's where something needs to happen based on targetType",targetType);
+			}
+		}
+		
+		function flameFactory(idx,scene){
+			let baseStr='<a-entity class="target green" position="#PX1 0 0">'+
+						'	<a-gltf-model src="../assets/flamegreen/flamegreen.gltf" mixin="specs rotY rotX"></a-gltf-model>'+
+						'</a-entity>'+
+						'<a-entity class="target blue" position="-#PX2 0 0">'+
+						'	<a-gltf-model src="../assets/flameblue/flameblue.gltf" mixin="specs rotY rotX"></a-gltf-model>'+
+						'</a-entity>';
+			let e=document.createElement("a-entity");
+			e.setAttribute("id","pair"+idx);
+			e.setAttribute("mixin","revY");
+			e.setAttribute("class","pairs");
+			let px=Math.floor(Math.random()*40)/10;
+			e.innerHTML=baseStr.replace("#PX1",px).replace("#PX2",px);
+			scene.appendChild(e); 
+		}
+		
+		function extinguishFlame(){
+			let randomPair = document.getElementsByClassName("pairs")[0];
+			let remove=document.getElementById(id);
+			scene.removeChild(remove);
+		}
+	</script>
+</html>
