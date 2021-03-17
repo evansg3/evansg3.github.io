@@ -1,0 +1,2 @@
+Attribution
+"[Little Wizard](https://sketchfab.com/3d-models/little-wizard-f9a98cd814614e289b130a3a08b1241e)" by [CalvinQuan](https://sketchfab.com/CalvinQuan) is licensed under [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/)
